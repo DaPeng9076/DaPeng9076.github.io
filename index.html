@@ -17,7 +17,7 @@
 </head>
 <body>
   <div id='app'>
-    <div style="width: 400px">
+    <div style="width: 380px">
       <el-input v-model="total0" @change="compute()" placeholder="标价总金额"></el-input>
       <el-input style="margin: 10px 0;" v-model="total" @change="compute()" placeholder="实付总金额"></el-input>
       <div><i style="font-size: 0.5em; color: gray">（空格分隔，自动求和）</i></div>
@@ -65,12 +65,12 @@
       },
       methods: {
         compute(type) {
-          let a = this.total0.split(" ").reduce((sum,cur) => parseInt(sum) + (parseInt(cur) || 0))
-          let b = this.total.split(" ").reduce((sum,cur) => parseInt(sum) + (parseInt(cur) || 0))
+          let a = this.total0.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
+          let b = this.total.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
           this.items.forEach(item => {
-            item.c = item.a.split(" ").reduce((sum,cur) => parseInt(sum) + (parseInt(cur) || 0))
+            item.c = item.a.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
             if(this.total0 !== "" && this.total0 !== 0)
-              item.b = b * item.c / a 
+              item.b = (b * item.c / a ).toFixed(2)
           })
         },
         click() {
