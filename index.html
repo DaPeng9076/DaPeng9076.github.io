@@ -18,10 +18,20 @@
 <body>
   <div id='app'>
     <div style="width: 580px">
-      <el-input v-model="total0" @change="compute()" placeholder="标价总金额"></el-input>
-      <el-input style="margin: 10px 0;" v-model="total" @change="compute()" placeholder="实付总金额"></el-input>
-      <div><i style="font-size: 0.5em; color: gray">（空格分隔，自动求和）</i></div>
-      <el-button style="margin: 10px;" @click="click()" type="primary">添加</el-button>
+      <el-input v-model="total_o" @change="compute()" placeholder="标价总金额"></el-input>
+      <el-input style="margin: 10px 0;" v-model="total_d" @change="compute()" placeholder="实付总金额"></el-input>
+      <div><i style="font-size: 0.5em; color: gray">（空格分隔数字，会自动相加。如：11 22 33）</i></div>
+      <el-button style="margin: 10px;" @click="addCol()" type="primary">添加</el-button>
+      <el-button style="margin: 10px;" @click="refresh()" type="primary">刷新</el-button>
+      <span>折扣: {{discount.toFixed(2)}}</span>
+      <br>
+      <!-- <el-button style="margin: 10px;" @click="click()" type="primary">ddd</el-button> -->
+      <el-input  v-model="time" placeholder="哪次消费">
+        <template slot="prepend">事件：</template>
+      </el-input>
+      <el-input  v-model="payer" placeholder="付款人" style="margin: 10px 0;">
+        <template slot="prepend">转给：</template>
+      </el-input>
       <el-table
         :data="items"
         style="width: 100%">
@@ -29,18 +39,18 @@
         label="姓名"
         width="180">
           <template slot-scope="scope">
-            <el-input></el-input>
+            <el-input  v-model="scope.row.name"></el-input>
           </template>
         </el-table-column>
         <el-table-column
-          label="金额"
+          label="标价金额"
           width="180">
           <template slot-scope="scope">
-            <el-input @change="compute()" v-model="scope.row.a" placeholder="xxx"></el-input>
+            <el-input @change="compute()" v-model="scope.row.price_o" placeholder=""></el-input>
           </template>
         </el-table-column>
         <el-table-column
-          prop="b"
+          prop="price_d"
           label="应付">
         </el-table-column>
         <el-table-column
@@ -57,38 +67,64 @@
           </template>
         </el-table-column>
       </el-table>
+
     </div>
   </div>
-  <el-input v-model="" placeholder=""></el-input>
 
   <script>
     new Vue({
       el: "#app",
       data: {
-        total0: '',
-        total: '',
-        items: [{a:'',b:0}
-        ],
+        total_o: '',
+        total_d: '',
+        time: '',
+        discount: 1.00,
+        payer: '',
+        items: [{
+          name: '',
+          price_o:'',
+          price_d:0
+        }],
       },
       methods: {
         compute(type) {
-          let a = this.total0.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
-          let b = this.total.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
+          let price_o = this.total_o.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
+          let price_d = this.total_d.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
+          this.discount = (price_d / price_o)
           this.items.forEach(item => {
-            item.c = item.a.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
-            if(this.total0 !== "" && this.total0 !== 0)
-              item.b = (b * item.c / a ).toFixed(2)
+            
+            let price_temp = item.price_o.split(" ").reduce((sum,cur) => parseFloat(sum) + (parseFloat(cur) || 0))
+            if(this.total_o !== "" && this.total_o !== 0)
+              item.price_d = (this.discount * price_temp ).toFixed(2)
           })
-        },
-        click() {
-          this.items.push({a:'',b:0})
+        }, 
+        addCol() {
+          this.items.push({name: '',price_o:'',price_d:0})
         },
         deleteRow(index) {
           this.items.splice(index,1)
+        },
+        refresh() {
+          this.total_d = '',
+          this.total_o = '',
+          this.time = '',
+          this.payer = '',
+          this.items.forEach(item => {
+            item.name = '',
+            item.price_o = '',
+            item.price_d = 0
+          })
+        },
+        click() {
+          console.log(this.discount)
         }
 
       }
     })
   </script>
+
+  <style>
+
+  </style>
 </body>
 </html>
